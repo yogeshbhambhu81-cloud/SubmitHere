@@ -11,7 +11,6 @@ export default function Signup() {
         name: "",
         email: "",
         password: "",
-        role: "student",
         department: "",
     });
     const [departments, setDepartments] = useState([]);
@@ -151,20 +150,6 @@ export default function Signup() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-                <div>
-                    <label className="text-xs font-medium text-slate-600">Role</label>
-                    <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="mt-1 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-300"
-                    >
-                        <option value="student">Student</option>
-                        <option value="professor">Professor</option>
-                        <option value="hod">HOD</option>
-                    </select>
-                </div>
-
                 <div>
                     <label className="text-xs font-medium text-slate-600">Department</label>
                     <select

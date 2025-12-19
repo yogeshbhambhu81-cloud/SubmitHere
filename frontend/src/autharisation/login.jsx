@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "", role: "" });
+  const [formData, setFormData] = useState({ email: "", password: ""});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [toast, setToast] = useState(null);
@@ -27,7 +27,6 @@ export default function Login() {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
-          role: formData.role.toLowerCase(),
         }),
       });
 
@@ -41,9 +40,9 @@ export default function Login() {
         if (data.departments)
           localStorage.setItem("departments", JSON.stringify(data.departments));
 
-        if (data.user?.role === "admin") navigate("/admin");
-        else if (data.redirect) navigate(data.redirect);
-        else navigate(`/${formData.role}`);
+        if (data.redirect) {
+          navigate(data.redirect);
+        }
       } else {
         showToast(data.message || "Login failed", true);
       }
@@ -91,7 +90,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-slate-600">Username</label>
+            <label className="text-xs font-medium text-slate-600">Email</label>
             <input
               name="email"
               value={formData.email}
@@ -121,24 +120,6 @@ export default function Login() {
               </button>
             </div>
           </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-600">Role</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-              className="mt-1 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-900 text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-300"
-            >
-              <option value="">Select role</option>
-              <option value="admin">Admin</option>
-              <option value="student">Student</option>
-              <option value="professor">Professor</option>
-              <option value="hod">HOD</option>
-            </select>
-          </div>
-
           <button
             type="submit"
             disabled={loading}

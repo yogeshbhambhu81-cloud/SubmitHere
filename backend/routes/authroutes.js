@@ -38,9 +38,10 @@ const sendOtpEmail = async (email, otp) => {
 
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, role, department } = req.body;
+    const { name, email, password, department } = req.body;
+    const role = "student";
 
-    if (!email || !password || !role)
+    if (!email || !password)
       return res.status(400).json({ message: "All fields are required." });
 
     const inUsers = await User.findOne({ email });
@@ -53,8 +54,8 @@ router.post("/signup", async (req, res) => {
 
     const otp = generateOTP();
     const otpExpiresAt = new Date(Date.now() + 10 * 60000);
-    const emailSent = await sendOtpEmail(email, otp);
 
+    const emailSent = await sendOtpEmail(email, otp);
     if (!emailSent)
       return res.status(500).json({ message: "Failed to send verification email." });
 
@@ -64,7 +65,7 @@ router.post("/signup", async (req, res) => {
     pendingUser.name = name;
     pendingUser.email = email;
     pendingUser.password = hashed;
-    pendingUser.role = role;
+    pendingUser.role = role; // 👈 auto student
     pendingUser.department = department;
     pendingUser.otp = otp;
     pendingUser.otpExpiresAt = otpExpiresAt;
@@ -112,14 +113,14 @@ router.post("/login", async (req, res) => {
   try {
     const email = (req.body.email ?? "").trim();
     const password = (req.body.password ?? "").trim();
-    const role = (req.body.role ?? "").trim();
 
     const user = await User.findOne({ email });
 
     if (!user) {
       const pending = await PendingUser.findOne({ email });
       if (pending) {
-        if (!pending.isEmailVerified) return res.status(401).json({ message: "Email not verified." });
+        if (!pending.isEmailVerified)
+          return res.status(401).json({ message: "Email not verified." });
         return res.status(401).json({ message: "Account pending admin approval." });
       }
       return res.status(400).json({ message: "User not found." });
@@ -128,21 +129,22 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid password." });
 
-    if (user.role !== role) return res.status(403).json({ message: `Please login as ${user.role}` });
-
     const token = jwt.sign(
-      { id: user._id, name: user.name, email: user.email, role: user.role, department: user.department },
+      {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department
+      },
       SECRET,
       { expiresIn: "7d" }
     );
 
-    const departments = await Department.find({}, "name slug").sort({ name: 1 });
-
     return res.json({
       message: "Login successful",
-      redirect: `/${user.role}`,
+      redirect: `/${user.role}`, // 👈 auto dashboard
       token,
-      departments,
       user: {
         id: user._id,
         name: user.name,
