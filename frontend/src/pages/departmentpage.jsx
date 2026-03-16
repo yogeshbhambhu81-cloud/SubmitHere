@@ -6,6 +6,7 @@ export default function DepartmentManagement() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState(null);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const showToast = (message, isError = false) => {
     setToast({ message, isError });
@@ -15,7 +16,7 @@ export default function DepartmentManagement() {
   const fetchDepartments = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/department", {
+      const res = await fetch(`${API_BASE_URL}/api/department`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       if (res.ok) {
@@ -36,7 +37,7 @@ export default function DepartmentManagement() {
     
     setAdding(true);
     try {
-      const res = await fetch("http://localhost:5000/api/department", {
+      const res = await fetch(`${API_BASE_URL}/api/department`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +64,7 @@ export default function DepartmentManagement() {
     if (!window.confirm("Are you sure you want to delete this department? This cannot be undone.")) return;
     
     try {
-      const res = await fetch(`http://localhost:5000/api/department/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/department/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });

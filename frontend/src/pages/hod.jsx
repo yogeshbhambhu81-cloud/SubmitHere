@@ -1,7 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-
-const API = "http://localhost:5000/api/hod";
-
 export default function HodDashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
@@ -12,6 +9,8 @@ export default function HodDashboard() {
   const [students, setStudents] = useState([]);
   const [showStudents, setShowStudents] = useState(false);
   const [studentView, setStudentView] = useState(null);
+    const API = import.meta.env.VITE_API_BASE_URL;
+
 
   const loadCounts = useCallback(async () => {
     const r = await fetch(`${API}/counts`, {

@@ -9,6 +9,7 @@ export default function MyAssignments() {
   const [loading, setLoading] = useState(false);
   const [loadingAssignments, setLoadingAssignments] = useState(true);
   const [toast, setToast] = useState(null);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const email = user?.email || "";
@@ -20,7 +21,7 @@ export default function MyAssignments() {
 
   const loadAssignments = () => {
     setLoadingAssignments(true);
-    fetch(`http://localhost:5000/api/student/all/${email.toLowerCase()}`, {
+    fetch(`${API_BASE_URL}/api/student/all/${email.toLowerCase()}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -68,7 +69,7 @@ export default function MyAssignments() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/student/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/student/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -245,7 +246,7 @@ export default function MyAssignments() {
 
                   <div className="col-span-3 flex justify-end gap-2">
                     <a
-                      href={`http://localhost:5000/api/student/file/${a._id}`}
+                      href={`${API_BASE_URL}/api/student/file/${a._id}`}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-sm transition-all"

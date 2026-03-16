@@ -18,7 +18,8 @@ export default function Signup() {
     const [step, setStep] = useState(STEP_FORM);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
-
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    
     const formVariant = {
         hidden: { opacity: 0, x: -50 },
         visible: { opacity: 1, x: 0 },
@@ -32,7 +33,7 @@ export default function Signup() {
 
     const fetchDepartments = async () => {
         try {
-            const res = await fetch("http://localhost:5000/api/department");
+            const res = await fetch(`${API_BASE_URL}/api/department`);
             if (res.ok) {
                 const data = await res.json();
                 setDepartments(data);
@@ -58,7 +59,7 @@ export default function Signup() {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/api/auth/signup", {
+            const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -83,7 +84,7 @@ export default function Signup() {
         setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
+            const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: formData.email, otp }),

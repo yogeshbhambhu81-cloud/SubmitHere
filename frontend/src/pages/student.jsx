@@ -7,7 +7,7 @@ export default function StudentAssignment() {
   const [showPrev, setShowPrev] = useState(false);
   const [title, setTitle] = useState("");
   const [toast, setToast] = useState(null);
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const email = user?.email || "";
 
@@ -45,7 +45,7 @@ export default function StudentAssignment() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/student/upload", {
+     const res = await fetch(`${API_BASE_URL}/api/student/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -71,7 +71,7 @@ export default function StudentAssignment() {
   };
 
   const loadAssignments = () => {
-    fetch(`http://localhost:5000/api/student/all/${email.toLowerCase()}`, {
+    fetch(`${API_BASE_URL}/api/student/all/${email.toLowerCase()}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },

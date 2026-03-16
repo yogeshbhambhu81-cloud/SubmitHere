@@ -11,6 +11,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [toast, setToast] = useState(null);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
   const [showFacultyModal, setShowFacultyModal] = useState(false);
 const [facultyForm, setFacultyForm] = useState({
@@ -38,16 +39,16 @@ const [facultyForm, setFacultyForm] = useState({
   };
 
   const fetchApprovedUsers = async () => {
-    const res = await fetch("http://localhost:5000/api/admin/users", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    const data = await res.json();
-    setUsers(data);
-  };
+  const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  const data = await res.json();
+  setUsers(data);
+};
 
   const fetchDepartments = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/department");
+      const res = await fetch(`${API_BASE_URL}/api/department`);
       if (res.ok) {
         const data = await res.json();
         setDepartments(data);
@@ -56,18 +57,18 @@ const [facultyForm, setFacultyForm] = useState({
   };
 
   const fetchPending = async () => {
-    const res = await fetch("http://localhost:5000/api/admin/pending", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+    const res = await fetch(`${API_BASE_URL}/api/admin/pending`, {
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+});
     const data = await res.json();
     setPending(data);
   };
 
   const approveUser = async (id) => {
-    const res = await fetch(`http://localhost:5000/api/admin/approve/${id}`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+    const res = await fetch(`${API_BASE_URL}/api/admin/approve/${id}`, {
+  method: "POST",
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+});
     if (res.ok) showToast("User approved successfully!");
     else showToast("Error approving user.", true);
     fetchPending();
@@ -75,10 +76,10 @@ const [facultyForm, setFacultyForm] = useState({
   };
 
   const rejectUser = async (id) => {
-    const res = await fetch(`http://localhost:5000/api/admin/reject/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+    const res = await fetch(`${API_BASE_URL}/api/admin/reject/${id}`, {
+  method: "DELETE",
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+});
     if (res.ok) showToast("User request rejected.");
     else showToast("Error rejecting user.", true);
     fetchPending();
@@ -86,24 +87,23 @@ const [facultyForm, setFacultyForm] = useState({
 
   const deleteUser = async (id) => {
     setConfirmDelete(null);
-    const res = await fetch(`http://localhost:5000/api/admin/delete/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+    const res = await fetch(`${API_BASE_URL}/api/admin/delete/${id}`, {
+  method: "DELETE",
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+});
     if (res.ok) showToast("User deleted successfully.");
     else showToast("Error deleting user.", true);
     fetchApprovedUsers();
   };
   const createFaculty = async () => {
-  const res = await fetch("http://localhost:5000/api/admin/create-faculty", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify(facultyForm),
-  });
-
+  const res = await fetch(`${API_BASE_URL}/api/admin/create-faculty`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+  body: JSON.stringify(facultyForm),
+});
   const data = await res.json();
 
   if (res.ok) {
