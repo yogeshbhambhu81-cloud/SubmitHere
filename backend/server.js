@@ -2,12 +2,15 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import bodyParser from "body-parser";
+import dotenv from "dotenv";
 import authRoutes from "./routes/authroutes.js";
 import userRoutes from "./routes/adminroutes.js";
 import studentRoutes from "./routes/student.js";
 import professorRoutes from "./routes/professorRoutes.js";
 import departmentRoutes from "./routes/departmentRoute.js";
 import hodRoutes from "./routes/hod.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -17,7 +20,7 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/universityData", {
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -41,5 +44,5 @@ app.use("/api/hod", hodRoutes);
 
 app.get("/", (req, res) => res.send("Backend working ✅"));
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
