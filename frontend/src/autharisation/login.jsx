@@ -19,6 +19,10 @@ export default function Login() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
+    if (!API_BASE_URL) {
+  showToast("VITE_API_BASE_URL is missing", true);
+  return;
+}
     e.preventDefault();
     setLoading(true);
     try {
@@ -31,7 +35,16 @@ export default function Login() {
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+let data = null;
+
+try {
+  data = JSON.parse(text);
+} catch {
+  console.error("Non-JSON response:", text);
+  showToast("API route not found or server returned HTML", true);
+  return;
+}
 
       if (res.ok) {
         showToast(data.message || "Login successful");
