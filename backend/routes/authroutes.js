@@ -18,6 +18,9 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 const sendOtpEmail = async (email, otp) => {
   try {
+    console.log("BREVO_SMTP_LOGIN exists:", !!process.env.BREVO_SMTP_LOGIN);
+console.log("BREVO_SMTP_KEY exists:", !!process.env.BREVO_SMTP_KEY);
+console.log("BREVO_SENDER:", process.env.BREVO_SENDER);
     const transporter = nodemailer.createTransport({
       host: "smtp-relay.brevo.com",
       port: 587,
@@ -27,6 +30,8 @@ const sendOtpEmail = async (email, otp) => {
         pass: process.env.BREVO_SMTP_KEY
       }
     });
+    await transporter.verify();
+console.log("SMTP transporter verified");
 
     await transporter.sendMail({
       from: process.env.BREVO_SENDER,
@@ -37,9 +42,11 @@ const sendOtpEmail = async (email, otp) => {
 
     return true;
   } catch (err) {
-    console.error("OTP MAIL ERROR:", err);
-    return false;
-  }
+  console.error("OTP MAIL ERROR FULL:", err);
+  console.error("OTP MAIL ERROR MESSAGE:", err.message);
+  console.error("OTP MAIL ERROR RESPONSE:", err.response);
+  return false;
+}
 };
 
 
