@@ -6,7 +6,7 @@ import User from "../models/user.js";
 import PendingUser from "../models/pendinguser.js";
 import jwt from "jsonwebtoken";
 import Department from "../models/department.js";
-import nodemailer from "nodemailer";
+import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 const SECRET = process.env.SECRET;
@@ -18,35 +18,32 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 const sendOtpEmail = async (email, otp) => {
   try {
-    console.log("BREVO_SMTP_LOGIN exists:", !!process.env.BREVO_SMTP_LOGIN);
-console.log("BREVO_SMTP_KEY exists:", !!process.env.BREVO_SMTP_KEY);
-console.log("BREVO_SENDER:", process.env.BREVO_SENDER);
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.BREVO_SMTP_LOGIN,
-        pass: process.env.BREVO_SMTP_KEY
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "UniPortal",
+          email: process.env.BREVO_SENDER,
+        },
+        to: [{ email }],
+        subject: "Your Verification OTP",
+        textContent: `Your OTP code is: ${otp}. It will expire in 10 minutes.`,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+        },
       }
-    });
-    await transporter.verify();
-console.log("SMTP transporter verified");
+    );
 
-    await transporter.sendMail({
-      from: `"UniPortal" <${process.env.BREVO_SENDER}>`,
-      to: email,
-      subject: "Your Verification OTP",
-      text: `Your OTP code is: ${otp}. It will expire in 10 minutes.`
-    });
-
+    console.log("BREVO API MAIL SENT:", response.data);
     return true;
   } catch (err) {
-  console.error("OTP MAIL ERROR FULL:", err);
-  console.error("OTP MAIL ERROR MESSAGE:", err.message);
-  console.error("OTP MAIL ERROR RESPONSE:", err.response);
-  return false;
-}
+    console.error("BREVO API ERROR:", err.response?.data || err.message);
+    return false;
+  }
 };
 
 

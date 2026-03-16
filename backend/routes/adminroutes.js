@@ -3,7 +3,7 @@ import User from "../models/user.js";
 import PendingUser from "../models/pendinguser.js";
 import Assignment from "../models/assignment.js";
 import auth from "../middleware/auth.js";
-import nodemailer from "nodemailer";
+import axios from "axios";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 
