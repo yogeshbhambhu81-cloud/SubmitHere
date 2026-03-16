@@ -10,30 +10,37 @@ import bcrypt from "bcryptjs";
 dotenv.config();
 const router = express.Router();
 
-/* ================= BREVO SMTP CONFIG ================= */
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.BREVO_SMTP_LOGIN,
-    pass: process.env.BREVO_SMTP_KEY
-  }
-});
 
 /* ================= SEND MAIL FUNCTION ================= */
 
 const sendMail = async ({ to, subject, text }) => {
   try {
-    await transporter.sendMail({
-      from: process.env.BREVO_SENDER, // Must be verified sender in Brevo
-      to,
-      subject,
-      text
-    });
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "UniPortal",
+          email: process.env.BREVO_SENDER,
+        },
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+        },
+      }
+    );
+
+    console.log("BREVO MAIL SENT:", response.data);
+    return true;
   } catch (err) {
-    console.error("MAIL ERROR:", err);
+    console.error("BREVO MAIL ERROR:", err.response?.data || err.message);
+    return false;
   }
 };
 
