@@ -11,7 +11,7 @@ const getInitialAuth = () => {
   }
 };
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://uniportal-07kb.onrender.com/api/professor";
 
 export default function ProfessorDashboard() {
   const [auth, setAuth] = useState(getInitialAuth());
