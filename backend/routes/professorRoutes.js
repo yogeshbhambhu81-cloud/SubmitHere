@@ -17,7 +17,7 @@ router.get("/assignments-counts", async (req, res) => {
   const rechecking = await Assignment.countDocuments({
     department: d,
     status: "rechecking",
-    reviewerId: req.user.id
+    reviewerId: req.user.id || req.user._id
   });
 
   const approved = await Assignment.countDocuments({
@@ -40,61 +40,76 @@ router.get("/assignments-counts", async (req, res) => {
 });
 
 router.get("/assignments/:tab", async (req, res) => {
-  const d = req.user.department;
-  const tab = req.params.tab;
+  try {
+    const d = req.user.department;
+    const tab = req.params.tab;
 
-  let query = { department: d };
+    let query = { department: d };
 
-  if (tab === "pending") {
-    query.status = { $in: ["pending", "rechecking"] };
-    query.$or = [
-      { status: "pending" },
-      { status: "rechecking", reviewerId: req.user.id }
-    ];
-  } 
-  else if (tab === "approved") {
-    query.status = "approved";
-  } 
-  else if (tab === "rejected") {
-    query.status = "rejected";
+    if (tab === "pending") {
+      query = {
+        $or: [
+          { department: d, status: "pending" },
+          {  department: d, status: "rechecking", reviewerId: req.user.id || req.user._id  }
+        ]
+      };
+    } 
+    else if (tab === "approved") {
+      query.status = "approved";
+    } 
+    else if (tab === "rejected") {
+      query.status = "rejected";
+    }
+
+    const data = await Assignment.find(query)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(data);
+  } catch (err) {
+    console.error("ASSIGNMENTS ERROR:", err);
+    res.status(500).json({ message: "Server error" });
   }
-
-  const data = await Assignment.find(query).sort({ createdAt: -1 }).lean();
-  res.json(data);
 });
 
 router.patch("/assignments/:id/:action", async (req, res) => {
-  const { id, action } = req.params;
-  const target = action === "approve" ? "approved" : "rejected";
+  try {
+    const { id, action } = req.params;
+    const target = action === "approve" ? "approved" : "rejected";
 
-  const assignment = await Assignment.findById(id);
-  if (!assignment) {
-    return res.status(404).json({ message: "Assignment not found" });
+    const assignment = await Assignment.findById(id);
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // Department check
+    if (assignment.department !== req.user.department) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // 🔒 If already reviewed, only same professor can update
+    if (
+      ["approved", "rejected"].includes(assignment.status) &&
+      assignment.reviewerId &&
+      assignment.reviewerId.toString() !== (req.user.id || req.user._id).toString()
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Only original reviewer can update this assignment" });
+    }
+
+    assignment.status = target;
+    assignment.reviewerId = req.user.id || req.user._id;
+    assignment.reviewerName = req.user.name;
+    assignment.reviewedAt = new Date();
+
+    await assignment.save();
+    res.json(assignment);
+
+  } catch (err) {
+    console.error("PATCH ASSIGNMENT ERROR:", err);
+    res.status(500).json({ message: "Server error" });
   }
-
-  // Department check
-  if (assignment.department !== req.user.department) {
-    return res.status(403).json({ message: "Unauthorized" });
-  }
-
-  // 🔒 If already reviewed, only same professor can update
-  if (
-    ["approved", "rejected"].includes(assignment.status) &&
-    assignment.reviewerId &&
-    assignment.reviewerId.toString() !== req.user.id
-  ) {
-    return res
-      .status(403)
-      .json({ message: "Only original reviewer can update this assignment" });
-  }
-
-  assignment.status = target;
-  assignment.reviewerId = req.user.id;
-  assignment.reviewerName = req.user.name;
-  assignment.reviewedAt = new Date();
-
-  await assignment.save();
-  res.json(assignment);
 });
 
 
