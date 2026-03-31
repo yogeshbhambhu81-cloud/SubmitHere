@@ -14,9 +14,11 @@ dotenv.config();
 
 const app = express();
 
-console.log("Loaded CLIENT for CORS:", process.env.CLIENT);
+const clientOrigin = process.env.CLIENT ? process.env.CLIENT.replace(/\/$/, "") : true;
+console.log("Loaded CLIENT for CORS:", clientOrigin);
+
 app.use(cors({ 
-  origin: process.env.CLIENT || true, // fallback strictly accepts incoming request origin if CLIENT is unreadable
+  origin: clientOrigin, // Fallback strictly accepts incoming request origin if CLIENT is unreadable
   credentials: true 
 }));
 
