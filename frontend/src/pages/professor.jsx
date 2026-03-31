@@ -12,7 +12,7 @@ const getInitialAuth = () => {
   }
 };
 
-const API_BASE_URL = "https://uniportal-07kb.onrender.com/api/professor";
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/professor`;
 
 export default function ProfessorDashboard() {
   const [auth, setAuth] = useState(getInitialAuth());
@@ -30,6 +30,7 @@ export default function ProfessorDashboard() {
   const [toast, setToast] = useState(null);
   const [loadingAssignments, setLoadingAssignments] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [viewingFile, setViewingFile] = useState(null);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -158,7 +159,15 @@ const changeStatus = async (id, status) => {
       headers: { Authorization: "Bearer " + token }
     });
     const blob = await res.blob();
-    window.open(URL.createObjectURL(blob), "_blank");
+    const url = URL.createObjectURL(blob);
+    setViewingFile(url);
+  };
+
+  const closeFile = () => {
+    if (viewingFile) {
+      URL.revokeObjectURL(viewingFile);
+      setViewingFile(null);
+    }
   };
 
   const logout = () => {
@@ -450,6 +459,48 @@ const changeStatus = async (id, status) => {
 
       <ProfileSidebar isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
 
+      {/* PDF Viewer Modal */}
+      {viewingFile && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 sm:p-6 animate-fade-in"
+          onClick={closeFile}
+        >
+          <div 
+            className="relative w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-slate-800">Assignment Preview</h3>
+              </div>
+              <button 
+                onClick={closeFile}
+                className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-xl transition-all group"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* PDF Content */}
+            <div className="flex-1 bg-slate-100 relative">
+              <iframe 
+                src={viewingFile} 
+                className="w-full h-full border-none"
+                title="Assignment Content"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes fadeIn {
           from {
@@ -486,6 +537,21 @@ const changeStatus = async (id, status) => {
 
         .animate-fade-in {
           animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .animate-scale-in {
+          animation: scaleIn 0.2s ease-out forwards;
         }
       `}</style>
     </div>

@@ -147,6 +147,62 @@ Your signup request was rejected.
   }
 });
 
+/* ================= APPROVE ALL USERS ================= */
+
+router.post("/approve-all", auth, isAdmin, async (req, res) => {
+  try {
+    const pendingUsers = await PendingUser.find({ isEmailVerified: true });
+    if (!pendingUsers.length) return res.status(400).json({ message: "No pending verified users" });
+
+    const newUsersData = pendingUsers.map(p => ({
+      name: p.name,
+      email: p.email,
+      password: p.password,
+      role: p.role,
+      department: p.department
+    }));
+
+    await User.insertMany(newUsersData);
+    const ids = pendingUsers.map(p => p._id);
+    await PendingUser.deleteMany({ _id: { $in: ids } });
+
+    // Send emails asynchronously without blocking response too long
+    Promise.all(pendingUsers.map(p => sendMail({
+      to: p.email,
+      subject: "Your account has been approved",
+      text: `Hello ${p.name},\n\nYour account is approved. You may now log in.\n\n- University Admin`
+    }))).catch(console.error);
+
+    res.json({ message: `${pendingUsers.length} users approved successfully!` });
+  } catch (err) {
+    console.error("APPROVE ALL ERROR:", err);
+    res.status(500).json({ message: "Approve all failed" });
+  }
+});
+
+/* ================= REJECT ALL USERS ================= */
+
+router.delete("/reject-all", auth, isAdmin, async (req, res) => {
+  try {
+    const pendingUsers = await PendingUser.find({ isEmailVerified: true });
+    if (!pendingUsers.length) return res.status(400).json({ message: "No pending verified users" });
+
+    const ids = pendingUsers.map(p => p._id);
+    await PendingUser.deleteMany({ _id: { $in: ids } });
+
+    Promise.all(pendingUsers.map(p => sendMail({
+      to: p.email,
+      subject: "Signup Request Rejected",
+      text: `Hello ${p.name},\n\nYour signup request was rejected.\n\n- University Admin`
+    }))).catch(console.error);
+
+    res.json({ message: `${pendingUsers.length} users rejected successfully!` });
+  } catch (err) {
+    console.error("REJECT ALL ERROR:", err);
+    res.status(500).json({ message: "Reject all failed" });
+  }
+});
+
 /* ================= DELETE USER ================= */
 
 router.delete("/delete/:id", auth, isAdmin, async (req, res) => {

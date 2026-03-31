@@ -94,10 +94,17 @@ router.get("/all/:email", auth, async (req, res) => {
 
 router.get("/file/:id", async (req, res) => {
   try {
-    const download = req.app.locals.bucket.openDownloadStream(
-      new mongoose.Types.ObjectId(req.params.id)
-    );
-    download.pipe(res);
+    const fileId = new mongoose.Types.ObjectId(req.params.id);
+    const files = await req.app.locals.bucket.find({ _id: fileId }).toArray();
+    
+    if (!files.length) return res.sendStatus(404);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "inline; filename=" + files[0].filename
+    });
+
+    req.app.locals.bucket.openDownloadStream(fileId).pipe(res);
   } catch {
     res.status(500).json({ message: "Error downloading file" });
   }

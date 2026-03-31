@@ -11,6 +11,7 @@ export default function Admin() {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmBulkAction, setConfirmBulkAction] = useState(null);
   const [toast, setToast] = useState(null);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
@@ -85,6 +86,38 @@ const [facultyForm, setFacultyForm] = useState({
     if (res.ok) showToast("User request rejected.");
     else showToast("Error rejecting user.", true);
     fetchPending();
+  };
+
+  const approveAllUsers = async () => {
+    setConfirmBulkAction("approve");
+  };
+
+  const rejectAllUsers = async () => {
+    setConfirmBulkAction("reject");
+  };
+
+  const executeBulkAction = async () => {
+    if (!confirmBulkAction) return;
+    
+    const isApprove = confirmBulkAction === "approve";
+    const endpoint = isApprove ? "approve-all" : "reject-all";
+    const method = isApprove ? "POST" : "DELETE";
+    
+    const res = await fetch(`${API_BASE_URL}/api/admin/${endpoint}`, {
+      method,
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      showToast(data.message);
+    } else {
+      showToast(`Error ${isApprove ? "approving" : "rejecting"} all users.`, true);
+    }
+    
+    setConfirmBulkAction(null);
+    fetchPending();
+    if (isApprove) fetchApprovedUsers();
   };
 
   const deleteUser = async (id) => {
@@ -374,10 +407,28 @@ const [facultyForm, setFacultyForm] = useState({
           ) : null}
 
           <div className="mt-10 pt-6 border-t border-slate-200">
-            <h3 className="text-lg font-semibold mb-4 text-slate-800 flex items-center gap-2">
-              <span className="text-xl">⏳</span>
-              Pending Approvals
-            </h3>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+              <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                <span className="text-xl">⏳</span>
+                Pending Approvals
+              </h3>
+              {pending.length > 0 && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={approveAllUsers}
+                    className="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-lg text-sm font-medium transition-all"
+                  >
+                    Approve All
+                  </button>
+                  <button
+                    onClick={rejectAllUsers}
+                    className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg text-sm font-medium transition-all"
+                  >
+                    Reject All
+                  </button>
+                </div>
+              )}
+            </div>
 
             {pending.length === 0 ? (
               <div className="text-center py-10 bg-slate-50 rounded-lg border border-slate-200">
@@ -477,6 +528,54 @@ const [facultyForm, setFacultyForm] = useState({
                 className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-all shadow-sm"
               >
                 Delete Permanently
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Bulk Action Confirm Modal */}
+      {confirmBulkAction && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
+          onClick={() => setConfirmBulkAction(null)}
+        >
+          <div
+            className="bg-white rounded-xl p-6 w-full max-w-[420px] shadow-xl border border-slate-200 animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-5xl mb-3 text-center">
+              {confirmBulkAction === "approve" ? "✅" : "❌"}
+            </div>
+            <h3 className="text-xl font-semibold mb-2 text-slate-800 text-center">
+              Confirm Bulk {confirmBulkAction === "approve" ? "Approval" : "Rejection"}
+            </h3>
+            <p className="text-sm text-slate-600 text-center mb-2">
+              Are you sure you want to {confirmBulkAction === "approve" ? "approve" : "reject"} <span className="font-semibold text-slate-800">ALL verified users</span> in the pending list?
+            </p>
+            
+            {confirmBulkAction === "reject" && (
+              <div className="text-xs text-red-600 font-medium text-center bg-red-50 p-3 rounded-lg border border-red-200 mt-3">
+                This will automatically delete all verified pending requests instantly. This action cannot be undone.
+              </div>
+            )}
+            
+            <div className="flex justify-center gap-3 mt-6">
+              <button
+                onClick={() => setConfirmBulkAction(null)}
+                className="px-5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeBulkAction}
+                className={`px-5 py-2 rounded-lg text-white text-sm font-medium transition-all shadow-sm ${
+                  confirmBulkAction === "approve" 
+                    ? "bg-emerald-600 hover:bg-emerald-700"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                Yes, {confirmBulkAction === "approve" ? "Approve All" : "Reject All"}
               </button>
             </div>
           </div>
