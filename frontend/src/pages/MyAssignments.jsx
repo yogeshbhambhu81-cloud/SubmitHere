@@ -124,8 +124,8 @@ export default function MyAssignments() {
 
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
             <button
               onClick={() => window.history.back()}
               className="p-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 transition-all"
@@ -150,7 +150,7 @@ export default function MyAssignments() {
             </div>
           </div>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full sm:w-auto">
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
@@ -180,7 +180,7 @@ export default function MyAssignments() {
       <main className="max-w-7xl mx-auto px-6 py-8 animate-fade-in">
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           {/* Table Header */}
-          <div className="bg-slate-50 border-b border-slate-200">
+          <div className="hidden md:block bg-slate-50 border-b border-slate-200">
             <div className="grid grid-cols-12 gap-4 px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">
               <div className="col-span-4">Assignment Title</div>
               <div className="col-span-3">Submitted On</div>
@@ -212,13 +212,13 @@ export default function MyAssignments() {
               filteredAssignments.map((a, idx) => (
                 <div
                   key={a._id}
-                  className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-50 transition-colors group"
+                  className="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 md:items-center hover:bg-slate-50 transition-colors group"
                   style={{
                     animation: `fadeIn 0.4s ease-out ${idx * 0.05}s forwards`,
                     opacity: 0,
                   }}
                 >
-                  <div className="col-span-4 flex items-center gap-3">
+                  <div className="col-span-1 md:col-span-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {(a.title || "U").charAt(0).toUpperCase()}
                     </div>
@@ -230,11 +230,13 @@ export default function MyAssignments() {
                     </div>
                   </div>
 
-                  <div className="col-span-3 text-sm text-slate-600">
-                    {a.submittedAtFormatted || new Date(a.submittedAt).toLocaleDateString() || "N/A"}
+                  <div className="col-span-1 md:col-span-3 text-sm text-slate-600 flex md:block items-center justify-between">
+                    <span className="md:hidden font-semibold text-slate-500">Submitted:</span>
+                    <span>{a.submittedAtFormatted || new Date(a.submittedAt).toLocaleDateString() || "N/A"}</span>
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="col-span-1 md:col-span-2 flex md:block items-center justify-between">
+                    <span className="md:hidden font-semibold text-slate-500">Status:</span>
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold ${
                         statusConfig[a.status]?.bg || "bg-slate-100"
@@ -244,7 +246,7 @@ export default function MyAssignments() {
                     </span>
                   </div>
 
-                  <div className="col-span-3 flex justify-end gap-2">
+                  <div className="col-span-1 md:col-span-3 flex justify-start md:justify-end gap-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-slate-100">
                     <a
                       href={`${API_BASE_URL}/api/student/file/${a._id}`}
                       target="_blank"
@@ -294,7 +296,7 @@ export default function MyAssignments() {
           onClick={() => setShowUpload(false)}
         >
           <div 
-            className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-scale-in"
+            className="bg-white w-[90%] sm:w-full max-w-md mx-4 rounded-2xl p-6 shadow-2xl animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
@@ -380,7 +382,7 @@ export default function MyAssignments() {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

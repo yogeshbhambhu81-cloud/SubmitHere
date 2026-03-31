@@ -14,9 +14,14 @@ dotenv.config();
 
 const app = express();
 
+console.log("Loaded CLIENT for CORS:", process.env.CLIENT);
+app.use(cors({ 
+  origin: process.env.CLIENT || true, // fallback strictly accepts incoming request origin if CLIENT is unreadable
+  credentials: true 
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
 console.log("MONGO_URI exists:", !!process.env.MONGO_URI);

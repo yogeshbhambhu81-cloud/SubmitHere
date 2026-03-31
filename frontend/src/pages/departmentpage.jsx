@@ -112,8 +112,8 @@ export default function DepartmentManagement() {
       )}
 
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 sm:gap-0">
+          <div className="flex items-start sm:items-center gap-3">
             <button
               onClick={() => window.history.back()}
               className="p-2.5 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all"
@@ -135,19 +135,19 @@ export default function DepartmentManagement() {
 
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
           <h2 className="text-lg font-semibold mb-4 text-slate-800">Add New Department</h2>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={newDepartmentName}
               onChange={(e) => setNewDepartmentName(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="e.g., Computer Science"
-              className="flex-grow px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none text-slate-700 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-300 transition-all"
+              className="flex-grow w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none text-slate-700 text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-300 transition-all"
             />
             <button
               onClick={addDepartment}
               disabled={adding || !newDepartmentName.trim()}
-              className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-medium text-white shadow-sm flex items-center gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all"
+              className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-medium text-white shadow-sm flex items-center gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -206,7 +206,7 @@ export default function DepartmentManagement() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

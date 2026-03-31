@@ -179,8 +179,8 @@ const [facultyForm, setFacultyForm] = useState({
       )}
 
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between mb-4">
-          <div className="space-y-1">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4 sm:gap-0">
+          <div className="space-y-1 w-full">
             <h1 className="text-3xl font-semibold text-slate-800">
               Admin Dashboard
             </h1>
@@ -189,7 +189,7 @@ const [facultyForm, setFacultyForm] = useState({
             </p>
           </div>
 
-          <div className="flex gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto">
             <button
   onClick={() => setShowFacultyModal(true)}
   className="p-2.5 rounded-lg bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all"
@@ -269,8 +269,8 @@ const [facultyForm, setFacultyForm] = useState({
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-          <div className="flex justify-between items-start mb-5">
-            <div className="space-y-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start mb-5 gap-4 sm:gap-0">
+            <div className="space-y-2 w-full sm:w-auto overflow-x-auto">
               <h2 className="text-xl font-semibold text-slate-800">
                 {selectedRole ? (
                   <span className="flex items-center gap-2">
@@ -282,8 +282,8 @@ const [facultyForm, setFacultyForm] = useState({
                 )}
               </h2>
               {selectedRole && (
-                <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200 animate-slide-in">
-                  <label className="text-sm text-slate-600 font-medium">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200 animate-slide-in">
+                  <label className="text-sm text-slate-600 font-medium whitespace-nowrap">
                     Filter by Department:
                   </label>
                   <select
@@ -430,11 +430,11 @@ const [facultyForm, setFacultyForm] = useState({
       {/* Delete confirmation modal */}
       {confirmDelete && (
         <div
-          className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
+          className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
           onClick={() => setConfirmDelete(null)}
         >
           <div
-            className="bg-white rounded-xl p-6 w-[400px] shadow-xl border border-slate-200 animate-scale-in"
+            className="bg-white rounded-xl p-6 w-full max-w-[400px] shadow-xl border border-slate-200 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-5xl mb-3 text-center">⚠️</div>
@@ -468,7 +468,7 @@ const [facultyForm, setFacultyForm] = useState({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -549,11 +549,11 @@ const [facultyForm, setFacultyForm] = useState({
       `}</style>
      {showFacultyModal && (
   <div 
-    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
+    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
     onClick={() => setShowFacultyModal(false)}
   >
     <div
-      className="bg-white rounded-2xl p-6 w-[440px] shadow-2xl border border-slate-200 animate-scale-in"
+      className="bg-white rounded-2xl p-6 w-full max-w-[440px] shadow-2xl border border-slate-200 animate-scale-in"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-6">
@@ -680,7 +680,7 @@ const [facultyForm, setFacultyForm] = useState({
   </div>
 )}
 
-<style jsx>{`
+<style>{`
   @keyframes fadeIn {
     from {
       opacity: 0;

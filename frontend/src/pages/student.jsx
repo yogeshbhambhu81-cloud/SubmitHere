@@ -116,7 +116,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
       {/* Header */}
       <header className="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm sticky top-0 z-20">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
               <span className="text-2xl">🎓</span>
@@ -132,7 +132,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap w-full sm:w-auto">
             <button
               onClick={() => window.location.href = "/my-assignments"}
               className="px-4 py-2 rounded-lg bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-sm transition-all flex items-center gap-2"
@@ -244,7 +244,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
               )}
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={handleSubmit}
                 disabled={!file || !title.trim() || loading}
@@ -314,8 +314,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                       opacity: 0
                     }}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3">
+                      <div className="flex flex-wrap sm:flex-nowrap items-start gap-3 w-full sm:w-auto flex-1 min-w-0">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                         {(file.title || "U").charAt(0).toUpperCase()}
                       </div>
                       
@@ -342,17 +343,18 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                           </span>
                         </div>
 
-                        <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <p className="text-xs text-slate-500 flex items-center gap-1.5 overflow-hidden">
+                          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
-                          {file.filename}
+                          <span className="truncate">{file.filename}</span>
                         </p>
+                      </div>
                       </div>
 
                       <a
                         href={`${API_BASE_URL}/api/student/file/${file._id}`}
-                        className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-sm transition-all flex items-center gap-1.5"
+                        className="w-full sm:w-auto justify-center px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-sm transition-all flex items-center gap-1.5"
                         target="_blank"
                         rel="noreferrer"
                       >
@@ -370,7 +372,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
         )}
       </main>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
