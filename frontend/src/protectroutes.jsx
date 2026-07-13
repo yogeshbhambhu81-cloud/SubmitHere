@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [status, setStatus] = useState("loading"); // "loading" | "ok" | reason-code string
   const location = useLocation();
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
+
       if (!token) {
-        setIsAuthenticated(false);
+        setStatus("NO_TOKEN");
         return;
       }
 
@@ -24,49 +25,73 @@ export default function ProtectedRoute({ children, allowedRoles }) {
         });
 
         if (res.ok) {
-          setIsAuthenticated(true);
+          setStatus("ok");
         } else {
-          // Token is dead or missing
+          // Read the error code the backend sends (TOKEN_EXPIRED / INVALID_TOKEN / NO_TOKEN)
+          const body = await res.json().catch(() => ({}));
+          const code = body.code || "NO_TOKEN";
+
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          setIsAuthenticated(false);
+          setStatus(code);
         }
-      } catch (err) {
-        setIsAuthenticated(false);
+      } catch {
+        // Network failure — treat as unauthenticated
+        setStatus("NO_TOKEN");
       }
     };
 
     checkAuth();
   }, []);
 
-  if (isAuthenticated === null) {
-    // Show a blank/loading screen while the token verification API is running to prevent flash of restricted content
+  // ── Loading spinner ────────────────────────────────────────────────────────
+  if (status === "loading") {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-4 border-slate-300 border-t-blue-600 rounded-full animate-spin"></div>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        height: "100vh", background: "#0f0f1a",
+      }}>
+        <div style={{
+          width: "36px", height: "36px",
+          border: "3px solid rgba(255,255,255,0.1)",
+          borderTop: "3px solid #6366f1",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite",
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    // If not valid, bounce back to login
-    return <Navigate to="/" state={{ from: location }} replace />;
+  // ── Not authenticated ──────────────────────────────────────────────────────
+  if (status !== "ok") {
+    return (
+      <Navigate
+        to="/unauthorized"
+        state={{ from: location, reason: status }}
+        replace
+      />
+    );
   }
 
-  // Optional local role gatekeeping to stop e.g. a student randomly hitting /admin
+  // ── Role gate ──────────────────────────────────────────────────────────────
   if (allowedRoles) {
     try {
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        if (!allowedRoles.includes(user.role)) {
-          return <Navigate to={`/${user.role}`} replace />;
-        }
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (user.role && !allowedRoles.includes(user.role)) {
+        return (
+          <Navigate
+            to="/unauthorized"
+            state={{ from: location, reason: "WRONG_ROLE" }}
+            replace
+          />
+        );
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
+      return <Navigate to="/unauthorized" state={{ reason: "NO_TOKEN" }} replace />;
     }
   }
 
   return children;
 }
+

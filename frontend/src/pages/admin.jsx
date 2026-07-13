@@ -34,6 +34,7 @@ const [facultyForm, setFacultyForm] = useState({
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("loginTimestamp");
     navigate("/");
   };
 

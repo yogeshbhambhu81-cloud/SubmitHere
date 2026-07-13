@@ -1,14 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+
+const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: ""});
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true); // true while we check existing session
   const [showPassword, setShowPassword] = useState(false);
   const [toast, setToast] = useState(null);
- const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // ── Auto-login: if valid session exists within 24h, skip login form ──────────
+  useEffect(() => {
+    const autoLogin = async () => {
+      const token         = localStorage.getItem("token");
+      const user          = JSON.parse(localStorage.getItem("user") || "null");
+      const loginTime     = parseInt(localStorage.getItem("loginTimestamp") || "0", 10);
+      const sessionAge    = Date.now() - loginTime;
+
+      // Only attempt auto-login if token + user exist AND session is under 24h
+      if (token && user?.role && sessionAge < SESSION_DURATION_MS) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/auth/verify`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            // Session still valid — send straight to their dashboard
+            navigate(`/${user.role}`, { replace: true });
+            return;
+          }
+        } catch {
+          // Network error — fall through and show login form
+        }
+        // Token rejected — clear stale data
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("loginTimestamp");
+      }
+
+      setChecking(false);
+    };
+
+    autoLogin();
+  }, []);
 
   const showToast = (message, isError = false) => {
     setToast({ message, isError });
@@ -50,7 +87,9 @@ try {
         showToast(data.message || "Login successful");
 
         if (data.token) localStorage.setItem("token", data.token);
-        if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.user)  localStorage.setItem("user", JSON.stringify(data.user));
+        // Save timestamp so the 24h auto-login check knows when this session started
+        localStorage.setItem("loginTimestamp", Date.now().toString());
         if (data.departments)
           localStorage.setItem("departments", JSON.stringify(data.departments));
 
@@ -67,6 +106,26 @@ try {
       setLoading(false);
     }
   };
+
+  // Show a dark spinner while checking existing session (prevents login form flash)
+  if (checking) {
+    return (
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        height: "100vh",
+        background: "linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #f0f9ff 100%)",
+      }}>
+        <div style={{
+          width: "36px", height: "36px",
+          border: "3px solid rgba(99,102,241,0.2)",
+          borderTop: "3px solid #6366f1",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite",
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-sky-100 flex items-center justify-center p-6">

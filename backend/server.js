@@ -1,16 +1,22 @@
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
+import "./config/redis.js";
+import { generalRateLimiter } from "./middleware/rateLimiter.js";
 import authRoutes from "./routes/authroutes.js";
 import userRoutes from "./routes/adminroutes.js";
 import studentRoutes from "./routes/student.js";
 import professorRoutes from "./routes/professorRoutes.js";
 import departmentRoutes from "./routes/departmentRoute.js";
+import healthRoutes from "./routes/healthroutes.js";
 // import hodRoutes from "./routes/hod.js";
 
+// Called here in the module body (after all imports are resolved).
+// redis.js also calls dotenv.config() in its own module body as a guard.
 dotenv.config();
+
 
 const app = express();
 
@@ -42,6 +48,13 @@ mongoose.connection.once("open", () => {
   app.locals.bucket = bucket;
 });
 
+// ─── Health check (exempt from rate limiting) ────────────────────────────────
+app.use("/api/health", healthRoutes);
+
+// ─── Global rate limit (100 req / min per IP across all API routes) ───────────
+app.use("/api", generalRateLimiter);
+
+// ─── Feature routes ───────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", userRoutes);
 app.use("/api/student", studentRoutes);

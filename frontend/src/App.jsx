@@ -7,6 +7,7 @@ import StudentAssignment from "./pages/student";
 import ProfessorDashboard from "./pages/professor";
 import DepartmentManagement from "./pages/departmentpage";
 import ProtectedRoute from "./protectroutes";
+import Unauthorized from "./pages/Unauthorized";
 import { ToastProvider } from "./components/Toast";
 import "./App.css";
 import MyAssignments from "./pages/MyAssignments";
@@ -64,7 +65,16 @@ function App() {
               </ProtectedRoute>
             }
           /> */}
-           <Route path="/my-assignments" element={<MyAssignments />} />
+            <Route
+            path="/my-assignments"
+            element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <MyAssignments />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/unauthorized" element={<Unauthorized />} />
         </Routes>
        
     

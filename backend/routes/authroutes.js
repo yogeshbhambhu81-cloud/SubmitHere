@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import Department from "../models/department.js";
 import axios from "axios";
 import auth from "../middleware/auth.js";
+import { loginRateLimiter, otpRateLimiter } from "../middleware/rateLimiter.js";
 import dotenv from "dotenv";
 dotenv.config();
 const SECRET = process.env.JWT_SECRET || process.env.SECRET;
@@ -48,7 +49,7 @@ const sendOtpEmail = async (email, otp) => {
 };
 
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", otpRateLimiter, async (req, res) => {
   try {
     const { name, email, password, department } = req.body;
     const role = "student";
@@ -92,7 +93,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/verify-otp", async (req, res) => {
+router.post("/verify-otp", otpRateLimiter, async (req, res) => {
   try {
     const { email, otp } = req.body;
 
@@ -121,7 +122,7 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginRateLimiter, async (req, res) => {
   try {
     console.log("Login route hit");
 console.log("Request body:", req.body);

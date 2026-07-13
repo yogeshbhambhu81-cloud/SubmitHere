@@ -22,6 +22,7 @@ export default function StudentAssignment() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("loginTimestamp");
     window.location.href = "/";
   };
 

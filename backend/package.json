@@ -14,10 +14,12 @@
     "dotenv": "^17.3.1",
     "express": "^4.22.1",
     "gridfs-stream": "^1.1.1",
+    "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.23.0",
     "multer": "^1.4.4",
     "multer-gridfs-storage": "^5.0.2",
-    "nodemailer": "^8.0.2"
+    "nodemailer": "^8.0.2",
+    "rate-limiter-flexible": "^11.2.0"
   }
 }
